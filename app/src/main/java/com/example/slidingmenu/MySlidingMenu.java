@@ -1,6 +1,7 @@
 package com.example.slidingmenu;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -17,7 +18,7 @@ public class MySlidingMenu extends HorizontalScrollView {
 
     private int menuWidth;
     private int menuRightPadding = 50;
-    private int rightMenuWidth;
+    private int halfMenuWidth;
     private int screenWidth;
     private int screenHeight;
     private Context context;
@@ -32,6 +33,8 @@ public class MySlidingMenu extends HorizontalScrollView {
         wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
+
+//        TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SlidingMenu, defS);
     }
 
 
@@ -49,6 +52,7 @@ public class MySlidingMenu extends HorizontalScrollView {
             menuRightPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                     menuRightPadding, content.getResources().getDisplayMetrics());
             menuWidth = screenWidth - menuRightPadding;
+            halfMenuWidth = menuWidth/2;
             menu.getLayoutParams().width = menuWidth;
             content.getLayoutParams().width = screenWidth;
         }
@@ -72,7 +76,7 @@ public class MySlidingMenu extends HorizontalScrollView {
         switch (action){
             case MotionEvent.ACTION_UP://UP时，判断，如果显示区域大于菜单宽度的一半，则隐藏
                 int scrollX = getScrollX();
-                if(scrollX > rightMenuWidth)
+                if(scrollX > halfMenuWidth)
                     this.smoothScrollTo(menuWidth, 0);
                 else
                     this.smoothScrollTo(0,0);

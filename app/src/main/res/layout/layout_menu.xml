@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+<com.example.slidingmenu.MySlidingMenu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linear"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:scrollbars="none">
+    <LinearLayout
+        android:id="@+id/horizontal_linear"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal">
+            <LinearLayout
+                android:id="@+id/menu_linear"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@color/deepgreen"
+                android:orientation="vertical"/>
 
-</LinearLayout>
+            <LinearLayout
+                android:id="@+id/main_linear"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:background="@color/dodgerblue"
+                android:orientation="vertical"/>
+    </LinearLayout>
+</com.example.slidingmenu.MySlidingMenu>
