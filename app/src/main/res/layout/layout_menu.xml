@@ -18,7 +18,7 @@
                 android:background="@color/deepgreen"
                 android:orientation="vertical"/>
 
-            <LinearLayout
+            <com.example.slidingmenu.ContentView
                 android:id="@+id/main_linear"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
