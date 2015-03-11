@@ -3,6 +3,8 @@ package com.example.slidingmenu;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 
 /**
@@ -10,14 +12,19 @@ import android.widget.LinearLayout;
  */
 public class ContentView extends LinearLayout {
 
-    private Context context;
     private int state = 0;
+    private Context context;
+    public Animation tweenBegin;
+    public Animation tweenBack;
 
     public ContentView(Context context, AttributeSet attrs){
 
         super(context, attrs);
         this.context = context;
-
+        tweenBegin = AnimationUtils.loadAnimation(this.context, R.anim.tween_begin);
+        tweenBack = AnimationUtils.loadAnimation(this.context, R.anim.tween_back);
+        tweenBegin.setFillAfter(true);
+        tweenBack.setFillAfter(true);
     }
 
     /**
@@ -33,16 +40,15 @@ public class ContentView extends LinearLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
-        System.out.println("Enter in onInterceptTouchEvent");
         int action = ev.getAction();
         switch (action){
             case MotionEvent.ACTION_DOWN:
-                System.out.println("Enter into Content ACTION_DOWN");
-//                int scrollX = getScrollX();//本身不是ScrollView类型的，得到的都是0
-//                System.out.println("Content.scrollX == "+scrollX);
                 state = 1;
-                System.out.println("Content is clicked");
-                return true;
+
+            case MotionEvent.ACTION_MOVE:
+//                System.out.println("move == "+(++move));
+
+
         }
         return false;
     }

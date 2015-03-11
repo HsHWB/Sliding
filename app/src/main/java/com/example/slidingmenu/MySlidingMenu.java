@@ -2,31 +2,38 @@ package com.example.slidingmenu;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.os.Handler;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+
+import com.example.activity.MainActivity;
+import com.example.constant.Normal;
 
 /**
  * Created by Hs on 2015/3/9.
  */
 public class MySlidingMenu extends HorizontalScrollView {
 
+    private MainActivity mainActivity;
     private int menuWidth;
     private int menuRightPadding = 100;
     private int halfMenuWidth;
     private int screenWidth;
-    private int screenHeight;
     private Context context;
     private DisplayMetrics dm;
     private WindowManager wm;
     private ViewGroup menu;
-//    private ViewGroup content;
     private ContentView content;
+    public Animation tweenBegin;
+    public Animation tweenBack;
     private boolean once;
 
     public MySlidingMenu(Context context, AttributeSet attrs){
@@ -36,18 +43,14 @@ public class MySlidingMenu extends HorizontalScrollView {
         wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
-
-//        TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SlidingMenu, defS);
     }
-
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if(!once){//如果没有隐藏
             LinearLayout ll = (LinearLayout)getChildAt(0);//parent布局的第1个子布局
             menu = (ViewGroup)ll.getChildAt(0);//获取ll布局的第一个子view
-//            content = (ViewGroup)ll.getChildAt(1);//ll布局的第二个子view
-            content = (ContentView)ll.getChildAt(1);
+            content = (ContentView)ll.getChildAt(1);//ll布局的第二个子view
 
             /*
              *dp转成px
@@ -87,16 +90,49 @@ public class MySlidingMenu extends HorizontalScrollView {
                 int scrollX = getScrollX();//在content全屏的情况下，X无论点哪里都是最大值，当侧滑结束的情况下，无论点哪里都是0，在滑动过程中X动态变化
                 System.out.println("scroollX =="+scrollX);
                 if(content.getClick() && scrollX == 0){
-                    System.out.println("MySlidingMenu is visible andr content is clicked");
-                    this.smoothScrollTo(menuWidth, 0);
+                    this.smoothScrollTweenTo(menuWidth, 0);
                     return true;
                 }
                 if(scrollX > halfMenuWidth)
-                    this.smoothScrollTo(menuWidth, 0);
+                    this.smoothScrollTweenTo(menuWidth, 0);
                 else
-                    this.smoothScrollTo(0,0);
+                    this.smoothScrollTweenTo(0, 0);
                 return true;
         }
         return super.onTouchEvent(ev);
     }
+
+
+    /**
+     * 写一个移动的方法，为了content可以动态获取X的变化实现动画移动
+     * @param x
+     * @param y
+     */
+    private void smoothScrollTweenTo(int x, int y){
+
+        super.smoothScrollTo(x,y);
+        if (x == 0) {//侧滑栏显示了
+            Message msg = new Message();
+            msg.what = Normal.TWEEN_BEGIN_HANDLER;
+            tweenHandler.sendMessage(msg);
+        }else if (x <= halfMenuWidth){//移动
+            Message msg = new Message();
+            msg.what = Normal.TWEEN_TURN_HANDLER;
+            tweenHandler.sendMessage(msg);
+        }else if (x >= halfMenuWidth){
+            Message msg = new Message();
+            msg.what = Normal.TWEEN_BEGIN_HANDLER;
+            tweenHandler.sendMessage(msg);
+        }
+//        super.smoothScrollTo(x,y);
+    }
+
+    public Handler tweenHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg){
+            if (msg.what == Normal.TWEEN_BEGIN_HANDLER) content.startAnimation(content.tweenBegin);
+            if (msg.what == Normal.TWEEN_TURN_HANDLER)content.startAnimation(content.tweenBack);
+        }
+    };
+
 }
