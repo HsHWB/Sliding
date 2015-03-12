@@ -28,12 +28,15 @@ public class MySlidingMenu extends HorizontalScrollView {
     private int menuRightPadding = 100;
     private int halfMenuWidth;
     private int screenWidth;
+    private int beginX = 0;
     private Context context;
     private DisplayMetrics dm;
     private WindowManager wm;
     private ViewGroup menu;
     private ContentView content;
     private boolean once;
+    private boolean isVisit;
+
 
     public MySlidingMenu(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -42,6 +45,7 @@ public class MySlidingMenu extends HorizontalScrollView {
         wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
+        isVisit = false;
     }
 
     @Override
@@ -85,17 +89,37 @@ public class MySlidingMenu extends HorizontalScrollView {
     public boolean onTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
         switch (action){
+//            case MotionEvent.ACTION_DOWN:
+//                beginX = getScrollX();
+//                System.out.println("ACTION_DOWN");
             case MotionEvent.ACTION_UP://UP时，用户（轻触触摸屏后）松开，或者按下屏幕快速移动后松开，判断，如果显示区域大于菜单宽度的一半，则隐藏
                 int scrollX = getScrollX();//在content全屏的情况下，X无论点哪里都是最大值，当侧滑结束的情况下，无论点哪里都是0，在滑动过程中X动态变化
-
+                int x = getScrollX();
+//                System.out.println("scrollX == "+scrollX);
                 if(content.getClick() && scrollX == 0){
                     super.smoothScrollTo(menuWidth, 0);
+                    isVisit = false;
+                    beginX = 0;
                     return true;
                 }
-                if(scrollX > halfMenuWidth*1.5)
+//                float differ = x - beginX;
+//                System.out.println("beginX == "+beginX);
+//                System.out.println("X == "+x);
+//                System.out.println("differ == "+differ);
+//                if (Math.abs(differ) > (screenWidth/5) && differ < 0){
+//                    beginX = 0;
+//                    super.smoothScrollTo(0, 0);
+//                }else if(Math.abs(differ) > (screenWidth/5) && differ >0 ){
+//                    beginX = 0;
+//                    super.smoothScrollTo(menuWidth, 0);
+//                }
+//                return true;
+                if(scrollX > halfMenuWidth*1.5){
                     super.smoothScrollTo(menuWidth, 0);
-                else
+                }
+                else {
                     super.smoothScrollTo(0, 0);
+                }
                 return true;
 //            case MotionEvent.ACTION_MOVE:
 //                System.out.println("moving scrollY() == "+getScrollY());
@@ -108,31 +132,33 @@ public class MySlidingMenu extends HorizontalScrollView {
     protected void onScrollChanged(int l, int t, int oldl, int oldt){
 
         super.onScrollChanged(l, t, oldl, oldt);
-        float scale = 1 * 1.0f / menuWidth;
-        float leftScale = 1 * 0.3f * scale;
+        float scale = l * 1.0f / menuWidth;//1、如果content从左向右即显示侧栏滑动的话，menuWidth会越来越小，scale会越来越大
+        float leftScale = 1 - 0.3f * scale;
         float rightScale = 0.8f + scale * 0.2f;
-        Double a = 0.6 + 0.4f * (1 - scale);
-        float alp = a.floatValue();
 
-        ViewHelper.setScaleX(menu, leftScale);
-        ViewHelper.setScaleY(menu,leftScale);
-        ViewHelper.setAlpha(menu,alp);
-        ViewHelper.setTranslationX(menu,menuWidth * scale * 0.6f);
-
-        ViewHelper.setPivotX(content, 0);
-        ViewHelper.setPivotY(content, content.getHeight() / 2);
-        ViewHelper.setScaleX(content, rightScale);
-        ViewHelper.setScaleY(content, rightScale);
-
-//        menu.setScaleX(leftScale);
-//        menu.setScaleY(leftScale);
-//        menu.setAlpha(alp);
-//        menu.setTranslationX(menuWidth * scale * 0.6f);
+//        /**
+//         * nineoldandroids包可以兼容旧版本的机器，ViewHelper可以用对应view代替
+//         */
+//        ViewHelper.setScaleX(menu, leftScale);
+//        ViewHelper.setScaleY(menu, leftScale);
+//        ViewHelper.setAlpha(menu, 0.6f + 0.4f * (1 - scale));
+//        ViewHelper.setTranslationX(menu, menuWidth * scale * 0.6f);
 //
-//        content.setPivotX(0);
-//        content.setPivotY(content.getHeight() / 2);
-//        content.setScaleX(rightScale);
-//        content.setScaleY(rightScale);
+//        ViewHelper.setPivotX(content, 0);
+//        ViewHelper.setPivotY(content, content.getHeight() / 2);
+//        ViewHelper.setScaleX(content, rightScale);
+//        ViewHelper.setScaleY(content, rightScale);
+
+        menu.setScaleX(leftScale);
+        menu.setScaleY(leftScale);
+//        menu.setAlpha(0.6f + 0.4f * (1 - scale));//2、若scale越来越大，则表达式越来越接近 0.6 ，透明度越来越小
+        menu.setAlpha(scale);
+        menu.setTranslationX(menuWidth * scale * 0.6f);
+
+        content.setPivotX(0);
+        content.setPivotY(content.getHeight() / 2);
+        content.setScaleX(rightScale);
+        content.setScaleY(rightScale);
 
     }
 

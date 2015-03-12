@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:scrollbars="none">
+    android:scrollbars="none"
+    android:background="@drawable/starry_sky3">
     <LinearLayout
         android:id="@+id/horizontal_linear"
         android:layout_width="fill_parent"
