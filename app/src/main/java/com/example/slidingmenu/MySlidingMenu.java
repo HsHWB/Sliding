@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 
 import com.example.activity.MainActivity;
 import com.example.constant.Normal;
+import com.nineoldandroids.view.ViewHelper;
 
 /**
  * Created by Hs on 2015/3/9.
@@ -32,8 +33,6 @@ public class MySlidingMenu extends HorizontalScrollView {
     private WindowManager wm;
     private ViewGroup menu;
     private ContentView content;
-    public Animation tweenBegin;
-    public Animation tweenBack;
     private boolean once;
 
     public MySlidingMenu(Context context, AttributeSet attrs){
@@ -52,8 +51,8 @@ public class MySlidingMenu extends HorizontalScrollView {
             menu = (ViewGroup)ll.getChildAt(0);//获取ll布局的第一个子view
             content = (ContentView)ll.getChildAt(1);//ll布局的第二个子view
 
-            /*
-             *dp转成px
+            /**
+             *  dp转成px
              */
 
             menuRightPadding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
@@ -76,10 +75,10 @@ public class MySlidingMenu extends HorizontalScrollView {
         super.onLayout(changed, l, t, r, b);
         if(changed){
             //隐藏菜单
+            System.out.println("change");
             this.scrollTo(menuWidth, 0);
             once = true;
         }
-
     }
 
     @Override
@@ -88,51 +87,53 @@ public class MySlidingMenu extends HorizontalScrollView {
         switch (action){
             case MotionEvent.ACTION_UP://UP时，用户（轻触触摸屏后）松开，或者按下屏幕快速移动后松开，判断，如果显示区域大于菜单宽度的一半，则隐藏
                 int scrollX = getScrollX();//在content全屏的情况下，X无论点哪里都是最大值，当侧滑结束的情况下，无论点哪里都是0，在滑动过程中X动态变化
-                System.out.println("scroollX =="+scrollX);
+
                 if(content.getClick() && scrollX == 0){
-                    this.smoothScrollTweenTo(menuWidth, 0);
+                    super.smoothScrollTo(menuWidth, 0);
                     return true;
                 }
-                if(scrollX > halfMenuWidth)
-                    this.smoothScrollTweenTo(menuWidth, 0);
+                if(scrollX > halfMenuWidth*1.5)
+                    super.smoothScrollTo(menuWidth, 0);
                 else
-                    this.smoothScrollTweenTo(0, 0);
+                    super.smoothScrollTo(0, 0);
                 return true;
+//            case MotionEvent.ACTION_MOVE:
+//                System.out.println("moving scrollY() == "+getScrollY());
+
         }
         return super.onTouchEvent(ev);
     }
 
+    @Override
+    protected void onScrollChanged(int l, int t, int oldl, int oldt){
 
-    /**
-     * 写一个移动的方法，为了content可以动态获取X的变化实现动画移动
-     * @param x
-     * @param y
-     */
-    private void smoothScrollTweenTo(int x, int y){
+        super.onScrollChanged(l, t, oldl, oldt);
+        float scale = 1 * 1.0f / menuWidth;
+        float leftScale = 1 * 0.3f * scale;
+        float rightScale = 0.8f + scale * 0.2f;
+        Double a = 0.6 + 0.4f * (1 - scale);
+        float alp = a.floatValue();
 
-        super.smoothScrollTo(x,y);
-        if (x == 0) {//侧滑栏显示了
-            Message msg = new Message();
-            msg.what = Normal.TWEEN_BEGIN_HANDLER;
-            tweenHandler.sendMessage(msg);
-        }else if (x <= halfMenuWidth){//移动
-            Message msg = new Message();
-            msg.what = Normal.TWEEN_TURN_HANDLER;
-            tweenHandler.sendMessage(msg);
-        }else if (x >= halfMenuWidth){
-            Message msg = new Message();
-            msg.what = Normal.TWEEN_BEGIN_HANDLER;
-            tweenHandler.sendMessage(msg);
-        }
-//        super.smoothScrollTo(x,y);
+        ViewHelper.setScaleX(menu, leftScale);
+        ViewHelper.setScaleY(menu,leftScale);
+        ViewHelper.setAlpha(menu,alp);
+        ViewHelper.setTranslationX(menu,menuWidth * scale * 0.6f);
+
+        ViewHelper.setPivotX(content, 0);
+        ViewHelper.setPivotY(content, content.getHeight() / 2);
+        ViewHelper.setScaleX(content, rightScale);
+        ViewHelper.setScaleY(content, rightScale);
+
+//        menu.setScaleX(leftScale);
+//        menu.setScaleY(leftScale);
+//        menu.setAlpha(alp);
+//        menu.setTranslationX(menuWidth * scale * 0.6f);
+//
+//        content.setPivotX(0);
+//        content.setPivotY(content.getHeight() / 2);
+//        content.setScaleX(rightScale);
+//        content.setScaleY(rightScale);
+
     }
-
-    public Handler tweenHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg){
-            if (msg.what == Normal.TWEEN_BEGIN_HANDLER) content.startAnimation(content.tweenBegin);
-            if (msg.what == Normal.TWEEN_TURN_HANDLER)content.startAnimation(content.tweenBack);
-        }
-    };
 
 }

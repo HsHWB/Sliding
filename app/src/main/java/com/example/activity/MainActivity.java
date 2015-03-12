@@ -35,7 +35,6 @@ public class MainActivity extends Activity {
         contentLinear = (ContentView)this.findViewById(R.id.main_linear);
     }
 
-//    private Handler tweenHandler = slidingMenu.tweenHandler;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

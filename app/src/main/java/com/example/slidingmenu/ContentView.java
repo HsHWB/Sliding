@@ -14,17 +14,13 @@ public class ContentView extends LinearLayout {
 
     private int state = 0;
     private Context context;
-    public Animation tweenBegin;
-    public Animation tweenBack;
+
 
     public ContentView(Context context, AttributeSet attrs){
 
         super(context, attrs);
         this.context = context;
-        tweenBegin = AnimationUtils.loadAnimation(this.context, R.anim.tween_begin);
-        tweenBack = AnimationUtils.loadAnimation(this.context, R.anim.tween_back);
-        tweenBegin.setFillAfter(true);
-        tweenBack.setFillAfter(true);
+
     }
 
     /**
