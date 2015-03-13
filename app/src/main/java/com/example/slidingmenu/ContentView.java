@@ -55,12 +55,12 @@ public class ContentView extends LinearLayout {
 
 
         }
-        if (shouldIntercept){
-//            this.mySlidingMenu = (MySlidingMenu)getParent();
-//            System.out.println("(MySlidingMenu)getParent() == "+getParent().);
-//            mySlidingMenu.shouldClose();
-            return true;
-        }
+//        if (shouldIntercept){
+////            this.mySlidingMenu = (MySlidingMenu)getParent();
+////            System.out.println("(MySlidingMenu)getParent() == "+getParent().);
+////            mySlidingMenu.shouldClose();
+//            return true;
+//        }
         return false;
     }
 

@@ -39,6 +39,7 @@ public class MySlidingMenu extends HorizontalScrollView {
     public static boolean shouldIntercept = false;
     private boolean isListView = false;
     private boolean once;
+    private boolean state = false;//记录侧滑状态，防止onTough的对应分发两个方法重复调用shouldclose
 
     public MySlidingMenu(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -89,44 +90,46 @@ public class MySlidingMenu extends HorizontalScrollView {
         }
     }
 
-//    @Override
-//    public boolean dispatchTouchEvent(MotionEvent ev){
-//
-//        View v = getRootView().findFocus();
-//        System.out.println("v == "+v);
-//        if ( (v instanceof ContentView || v instanceof ListView) && shouldIntercept){
-//            isListView = true;
-//            return true;
-//        }
-//        return super.dispatchTouchEvent(ev);
-//    }
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev){
+
+
+        if (isFocusOnListView(contentListView, ev) && shouldIntercept){
+            if(state) {
+//                System.out.println("点击listview");
+                isListView = true;
+            }
+            return true;
+        }
+
+        return super.onInterceptTouchEvent(ev);
+    }
 
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
+        System.out.println("onToughEvent");
         switch (action){
             case MotionEvent.ACTION_UP://UP时，用户（轻触触摸屏后）松开，或者按下屏幕快速移动后松开，判断，如果显示区域大于菜单宽度的一半，则隐藏
                 int scrollX = getScrollX();//在content全屏的情况下，X无论点哪里都是最大值，当侧滑结束的情况下，无论点哪里都是0，在滑动过程中X动态变化
-//                System.out.println("content.getClick() == "+content.getClick());
-//                if(content.getClick() && scrollX == 0){
-//                    System.out.println("in");
-//                    super.smoothScrollTo(menuWidth, 0);
-//                    shouldIntercept = false;
-//                    return true;
-//                }
+
                 if (isListView){
-                    super.smoothScrollTo(menuWidth, 0);
+//                    System.out.println("滑动 == "+isListView);
+                    state = false;
                     isListView = false;
+                    super.smoothScrollTo(menuWidth, 0);
                     return true;
                 }
 
                 if(scrollX > halfMenuWidth*1.5){
                     shouldIntercept = false;
+                    state = false;
                     super.smoothScrollTo(menuWidth, 0);
                 }
                 else {
                     shouldIntercept = true;
+                    state = true;
                     super.smoothScrollTo(0, 0);
                 }
                 isListView = false;
@@ -137,12 +140,13 @@ public class MySlidingMenu extends HorizontalScrollView {
     }
 
     public void shouldOpen(){
-        this.smoothScrollTo(0, 0);
+        super.smoothScrollTo(0, 0);
     }
 
-    public void shouldClose(){
-        smoothScrollTo(menuWidth, 0);
-    }
+//    public void shouldClose(){
+//        state = false;
+//        super.smoothScrollTo(menuWidth, 0);
+//    }
 
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt){
@@ -164,5 +168,19 @@ public class MySlidingMenu extends HorizontalScrollView {
 
     }
 
+    private boolean isFocusOnListView(View view, MotionEvent ev){
+
+        int[] viewLocation = new int[2];
+        view.getLocationOnScreen(viewLocation);
+        int x = viewLocation[0];
+        int y = viewLocation[1];
+        float evx = ev.getX();
+        float evy = ev.getY();
+        if (evx < x || evx > (x + view.getWidth()) || evy < y || evy > (y + view.getHeight()) ){
+            return false;
+        }
+        return  true;
+
+    }
 
 }
