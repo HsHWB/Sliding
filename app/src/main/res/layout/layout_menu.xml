@@ -16,14 +16,45 @@
                 android:id="@+id/menu_linear"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:background="@color/deepgreen"
-                android:orientation="vertical"/>
+                android:orientation="vertical">
+
+                <ListView
+                    android:id="@+id/menu_listview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
 
             <com.example.slidingmenu.ContentView
                 android:id="@+id/main_linear"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
-                android:background="@color/dodgerblue"
-                android:orientation="vertical"/>
+                android:background="@color/white"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/content_title_linear"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/deepskyblue">
+                    <ImageView
+                        android:id="@+id/content_image"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/ic_launcher"/>
+                </LinearLayout>
+
+                <ListView
+                    android:id="@+id/content_listview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+                <LinearLayout
+                    android:id="@+id/content_bottom_button"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/deepskyblue"
+                    android:orientation="horizontal"/>
+            </com.example.slidingmenu.ContentView>
     </LinearLayout>
 </com.example.slidingmenu.MySlidingMenu>

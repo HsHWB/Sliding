@@ -8,11 +8,14 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.widget.AbsListView;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 
 import com.example.activity.MainActivity;
 import com.example.constant.Normal;
@@ -23,20 +26,19 @@ import com.nineoldandroids.view.ViewHelper;
  */
 public class MySlidingMenu extends HorizontalScrollView {
 
-    private MainActivity mainActivity;
     private int menuWidth;
     private int menuRightPadding = 100;
     private int halfMenuWidth;
     private int screenWidth;
-    private int beginX = 0;
     private Context context;
     private DisplayMetrics dm;
     private WindowManager wm;
     private ViewGroup menu;
     private ContentView content;
+    private ListView contentListView;
+    public static boolean shouldIntercept = false;
+    private boolean isListView = false;
     private boolean once;
-    private boolean isVisit;
-
 
     public MySlidingMenu(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -45,7 +47,7 @@ public class MySlidingMenu extends HorizontalScrollView {
         wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         wm.getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
-        isVisit = false;
+
     }
 
     @Override
@@ -54,6 +56,7 @@ public class MySlidingMenu extends HorizontalScrollView {
             LinearLayout ll = (LinearLayout)getChildAt(0);//parent布局的第1个子布局
             menu = (ViewGroup)ll.getChildAt(0);//获取ll布局的第一个子view
             content = (ContentView)ll.getChildAt(1);//ll布局的第二个子view
+            this.contentListView = (ListView)content.findViewById(R.id.content_listview);
 
             /**
              *  dp转成px
@@ -81,51 +84,64 @@ public class MySlidingMenu extends HorizontalScrollView {
             //隐藏菜单
             System.out.println("change");
             this.scrollTo(menuWidth, 0);
+            shouldIntercept = false;
             once = true;
         }
     }
+
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent ev){
+//
+//        View v = getRootView().findFocus();
+//        System.out.println("v == "+v);
+//        if ( (v instanceof ContentView || v instanceof ListView) && shouldIntercept){
+//            isListView = true;
+//            return true;
+//        }
+//        return super.dispatchTouchEvent(ev);
+//    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
         switch (action){
-//            case MotionEvent.ACTION_DOWN:
-//                beginX = getScrollX();
-//                System.out.println("ACTION_DOWN");
             case MotionEvent.ACTION_UP://UP时，用户（轻触触摸屏后）松开，或者按下屏幕快速移动后松开，判断，如果显示区域大于菜单宽度的一半，则隐藏
                 int scrollX = getScrollX();//在content全屏的情况下，X无论点哪里都是最大值，当侧滑结束的情况下，无论点哪里都是0，在滑动过程中X动态变化
-                int x = getScrollX();
-//                System.out.println("scrollX == "+scrollX);
-                if(content.getClick() && scrollX == 0){
+//                System.out.println("content.getClick() == "+content.getClick());
+//                if(content.getClick() && scrollX == 0){
+//                    System.out.println("in");
+//                    super.smoothScrollTo(menuWidth, 0);
+//                    shouldIntercept = false;
+//                    return true;
+//                }
+                if (isListView){
                     super.smoothScrollTo(menuWidth, 0);
-                    isVisit = false;
-                    beginX = 0;
+                    isListView = false;
                     return true;
                 }
-//                float differ = x - beginX;
-//                System.out.println("beginX == "+beginX);
-//                System.out.println("X == "+x);
-//                System.out.println("differ == "+differ);
-//                if (Math.abs(differ) > (screenWidth/5) && differ < 0){
-//                    beginX = 0;
-//                    super.smoothScrollTo(0, 0);
-//                }else if(Math.abs(differ) > (screenWidth/5) && differ >0 ){
-//                    beginX = 0;
-//                    super.smoothScrollTo(menuWidth, 0);
-//                }
-//                return true;
+
                 if(scrollX > halfMenuWidth*1.5){
+                    shouldIntercept = false;
                     super.smoothScrollTo(menuWidth, 0);
                 }
                 else {
+                    shouldIntercept = true;
                     super.smoothScrollTo(0, 0);
                 }
+                isListView = false;
                 return true;
-//            case MotionEvent.ACTION_MOVE:
-//                System.out.println("moving scrollY() == "+getScrollY());
 
         }
         return super.onTouchEvent(ev);
+    }
+
+    public void shouldOpen(){
+        this.smoothScrollTo(0, 0);
+    }
+
+    public void shouldClose(){
+        smoothScrollTo(menuWidth, 0);
     }
 
     @Override
@@ -136,23 +152,9 @@ public class MySlidingMenu extends HorizontalScrollView {
         float leftScale = 1 - 0.3f * scale;
         float rightScale = 0.8f + scale * 0.2f;
 
-//        /**
-//         * nineoldandroids包可以兼容旧版本的机器，ViewHelper可以用对应view代替
-//         */
-//        ViewHelper.setScaleX(menu, leftScale);
-//        ViewHelper.setScaleY(menu, leftScale);
-//        ViewHelper.setAlpha(menu, 0.6f + 0.4f * (1 - scale));
-//        ViewHelper.setTranslationX(menu, menuWidth * scale * 0.6f);
-//
-//        ViewHelper.setPivotX(content, 0);
-//        ViewHelper.setPivotY(content, content.getHeight() / 2);
-//        ViewHelper.setScaleX(content, rightScale);
-//        ViewHelper.setScaleY(content, rightScale);
-
         menu.setScaleX(leftScale);
         menu.setScaleY(leftScale);
-//        menu.setAlpha(0.6f + 0.4f * (1 - scale));//2、若scale越来越大，则表达式越来越接近 0.6 ，透明度越来越小
-        menu.setAlpha(scale);
+        menu.setAlpha(0.4f + 0.4f * (1 - scale));//2、若scale越来越大，则表达式越来越接近 0.6 ，透明度越来越小
         menu.setTranslationX(menuWidth * scale * 0.6f);
 
         content.setPivotX(0);
@@ -161,5 +163,6 @@ public class MySlidingMenu extends HorizontalScrollView {
         content.setScaleY(rightScale);
 
     }
+
 
 }
