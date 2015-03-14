@@ -36,10 +36,11 @@ public class MySlidingMenu extends HorizontalScrollView {
     private ViewGroup menu;
     private ContentView content;
     private ListView contentListView;
-    public static boolean shouldIntercept = false;
-    private boolean isListView = false;
+    public static boolean shouldIntercept = false;//记录是否应该把listview触碰事件给截取下来
+    private boolean isListView = false;//记录点击的是否是listview
     private boolean once;
-    private boolean state = false;//记录侧滑状态，防止onTough的对应分发两个方法重复调用shouldclose
+    private boolean state = false;//记录侧滑状态，防止onTough的对应分发两个方法重复调用shouldclose。false
+                                  // 为不显示侧滑
 
     public MySlidingMenu(Context context, AttributeSet attrs){
         super(context, attrs);
@@ -95,8 +96,10 @@ public class MySlidingMenu extends HorizontalScrollView {
 
 
         if (isFocusOnListView(contentListView, ev) && shouldIntercept){
+
+            System.out.println("点击listview");
             if(state) {
-//                System.out.println("点击listview");
+                System.out.println("点击listview state");
                 isListView = true;
             }
             return true;
@@ -109,30 +112,52 @@ public class MySlidingMenu extends HorizontalScrollView {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
-        System.out.println("onToughEvent");
+//        System.out.println("onToughEvent");
         switch (action){
             case MotionEvent.ACTION_UP://UP时，用户（轻触触摸屏后）松开，或者按下屏幕快速移动后松开，判断，如果显示区域大于菜单宽度的一半，则隐藏
+
+                /**
+                 * scrollX代表UP点而不是Down的按下点
+                 */
                 int scrollX = getScrollX();//在content全屏的情况下，X无论点哪里都是最大值，当侧滑结束的情况下，无论点哪里都是0，在滑动过程中X动态变化
 
                 if (isListView){
 //                    System.out.println("滑动 == "+isListView);
-                    state = false;
+                    state = false;//准备关掉侧滑栏,状态设为false
                     isListView = false;
+                    shouldIntercept = false;
                     super.smoothScrollTo(menuWidth, 0);
                     return true;
                 }
 
-                if(scrollX > halfMenuWidth*1.5){
+                if(scrollX > halfMenuWidth*1.5 && state){//侧滑的宽度达到一定程度(scrollX越大代表拉的宽度越小，反弹)，
+                                                         // 而且state表示侧滑栏无显示
                     shouldIntercept = false;
                     state = false;
                     super.smoothScrollTo(menuWidth, 0);
-                }
-                else {
+                    return true;
+                }else if (scrollX <= halfMenuWidth && !state){//侧滑宽度小于一定程度，而且!state表示侧滑栏有显示，则继续显示侧滑
                     shouldIntercept = true;
                     state = true;
                     super.smoothScrollTo(0, 0);
+                    return true;
+                }else if (scrollX > halfMenuWidth && !state){//侧滑宽度大于一定程度，而且侧滑栏有显示，则关闭侧滑栏
+                    shouldIntercept = false;
+                    state = false;
+                    super.smoothScrollTo(menuWidth, 0);
+                    return true;
                 }
+                /**
+                 * 包含了scrollX <= halfMenuWidth && state的情况
+                 */
+                shouldIntercept = false;
                 isListView = false;
+                super.smoothScrollTo(menuWidth, 0);
+//                else {
+//                    shouldIntercept = true;
+//                    state = true;
+//                    super.smoothScrollTo(0, 0);
+//                }
                 return true;
 
         }
