@@ -3,10 +3,13 @@ package com.example.until;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -22,17 +25,37 @@ public class CirclePicture extends View {
     public CirclePicture(Context context) {
         super(context, null);
     }
-    public CirclePicture(Context context, AttributeSet attrs){
+
+    public CirclePicture(Context context, AttributeSet attrs) {
         super(context, attrs);
         paint = new Paint();
         this.context = context;
     }
 
     @Override
-    protected void onDraw(Canvas canvas){
+    protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (context != null){
+        if (context != null) {
+            SDCardFile sdCardImage = new SDCardFile(Environment.getExternalStorageDirectory()
+                    + "/Download/" + "picture1.jpg");
+            Bitmap bitmapPicture = sdCardImage.getSDImage();
 
+//            System.out.println("bitmapPicture == "+bitmapPicture);
+
+            Bitmap bitmap = zoomBitmap(bitmapPicture, 100, 100);
+            Bitmap roundBitmap = getRoundBitmap(bitmap);
+
+            Rect src = new Rect();
+            Rect dst = new Rect();// 屏幕位置及尺寸
+            src.left = 0;
+            src.top = 0;
+            src.right = roundBitmap.getWidth();//这个是桌面图的宽度，
+            src.bottom = roundBitmap.getHeight();//这个是桌面图的高度的一半
+            dst.left = 0;
+            dst.top = 0;
+            dst.right = roundBitmap.getWidth();    //表示需绘画的图片的右上角
+            dst.bottom = roundBitmap.getHeight();    //表示需绘画的图片的右下角
+            canvas.drawBitmap(roundBitmap, src, dst, paint);
         }
     }
 
@@ -40,7 +63,7 @@ public class CirclePicture extends View {
      * 用一个圆形，和图片做重叠，多余的部分裁掉，剩下的就是圆形头像
      */
 
-    private Bitmap getRoundBitmap(Bitmap bitmap){
+    private Bitmap getRoundBitmap(Bitmap bitmap) {
 
         int width = bitmap.getWidth();//圆形图片的长和宽
         int height = bitmap.getHeight();
@@ -61,11 +84,44 @@ public class CirclePicture extends View {
         //通过制定的rect画一个圆角矩形，当圆角X轴方向的半径等于Y轴方向的半径且都为r/2时
         // ，画出来的圆角矩形即是圆形
         //drawRoundRect是圆角矩形的方法(RectF对象,x方向上的圆角半径,y方向上的圆角半径,绘制时所使用的画笔)
-        canvas.drawRoundRect(rectF, r/2, r/2, paint);
+        canvas.drawRoundRect(rectF, r / 2, r / 2, paint);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(bitmap, null, rectF, paint);
 
         return backRound;
     }
 
+    /**
+     * 裁剪方法
+     *
+     * @param bitmap
+     * @return
+     */
+    private Bitmap zoomBitmap(Bitmap bitmap, int w, int h) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        Bitmap oldMap = bitmap;
+        Matrix matrix = new Matrix();
+        float scaleWidth = ((float) w / width);
+        float scaleHeight = ((float) h / height);
+        matrix.postScale(scaleWidth, scaleHeight);
+        Bitmap newMap = Bitmap.createBitmap(oldMap, 0, 0, width, height, matrix, true);
+        newMap = getRCB(newMap, 20f);
+        return newMap;
+    }
+
+    private Bitmap getRCB(Bitmap bitmap, float roundPX) {
+        Bitmap dstbmp = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(dstbmp);
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(0xff424242);
+        canvas.drawRoundRect(rectF, roundPX, roundPX, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+        return dstbmp;
+    }
 }

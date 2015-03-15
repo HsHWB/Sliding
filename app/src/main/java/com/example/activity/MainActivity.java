@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
@@ -19,6 +20,7 @@ import com.example.constant.Normal;
 import com.example.slidingmenu.ContentView;
 import com.example.slidingmenu.MySlidingMenu;
 import com.example.slidingmenu.R;
+import com.example.until.CirclePicture;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class MainActivity extends Activity {
     private LinearLayout menuLinear, contentTitle, contentBottom;
     private ContentView contentLinear;
     private ListView menuListView, contentListView;
+    private CirclePicture roundHead;
     private MenuAdapter menuAdapter;
     private ContentAdapter contentAdapter;
 
@@ -54,6 +57,7 @@ public class MainActivity extends Activity {
         contentListView = (ListView)this.findViewById(R.id.content_listview);
         contentTitle = (LinearLayout)this.findViewById(R.id.content_title_linear);
         contentBottom = (LinearLayout)this.findViewById(R.id.content_bottom_button);
+        roundHead = (CirclePicture)this.findViewById(R.id.menu_head_picture);
 
         menuAdapter = new MenuAdapter(this, screenHeight, screenWidth);
         menuListView.setAdapter(menuAdapter);
@@ -68,6 +72,9 @@ public class MainActivity extends Activity {
 
         ContentView.LayoutParams bottomParams = new ContentView.LayoutParams(screenWidth, screenHeight/10);
         contentBottom.setLayoutParams(bottomParams);
+
+        LinearLayout.LayoutParams roundHeadParams = new LinearLayout.LayoutParams(screenWidth / 3, screenHeight / 13);
+        roundHead.setLayoutParams(roundHeadParams);
     }
 
 

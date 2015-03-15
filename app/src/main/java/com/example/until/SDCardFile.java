@@ -2,6 +2,7 @@ package com.example.until;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 import com.example.slidingmenu.ContentView;
 
@@ -15,26 +16,51 @@ public class SDCardFile {
     private Context context;
     private File file;
     private String path;
+    private String name;
+
+    /**
+     * 一些路径的标准写法
+     Environment.getDataDirectory() = /data
+     Environment.getDownloadCacheDirectory() = /cache
+     Environment.getExternalStorageDirectory() = /mnt/sdcard
+     Environment.getRootDirectory() = /system
+     context.getCacheDir() = /data/data/com.mt.mtpp/cache
+     context.getExternalCacheDir() = /mnt/sdcard/Android/data/com.mt.mtpp/cache
+     context.getFilesDir() = /data/data/com.mt.mtpp/files
+     * @param path
+     */
+    public SDCardFile(String path){
+        this(null, path);
+    }
 
     public SDCardFile(Context context, String path){
         this.context = context;
         this.path = path;
-
+//        System.out.println("path == "+path);
     }
 
     /**
      * 获取图片
      * @return
      */
-    private Bitmap getImage(){
-        return null;
+    public Bitmap getSDImage(){
+        Bitmap bitmap;
+        file = new File(path);
+        System.out.println("file == "+file);
+        if (isExit()){
+            bitmap = BitmapFactory.decodeFile(path);
+//            System.out.println("sdBitmap == "+bitmap);
+        }else{
+            bitmap = null;
+        }
+        return bitmap;
     }
 
     /**
      * 获取文件的文字内容
      * @return
      */
-    private StringBuffer getText(){
+    public StringBuffer getText(){
         return null;
     }
 
@@ -45,4 +71,15 @@ public class SDCardFile {
     /**
      * 获取视频
      */
+
+    /**
+     * 判断文件是否存在
+     */
+    private boolean isExit(){
+        if (file.isFile()){//若存在此文件
+            return true;
+        }
+        return false;
+    }
+
 }

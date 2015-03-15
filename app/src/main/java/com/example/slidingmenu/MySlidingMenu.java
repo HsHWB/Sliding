@@ -193,18 +193,30 @@ public class MySlidingMenu extends HorizontalScrollView {
 
     }
 
+    /**
+     * http://blog.csdn.net/centralperk/article/details/7949900
+     * @param view
+     * @param ev
+     * @return
+     */
+
     private boolean isFocusOnListView(View view, MotionEvent ev){
 
-        int[] viewLocation = new int[2];
-        view.getLocationOnScreen(viewLocation);
-        int x = viewLocation[0];
-        int y = viewLocation[1];
+        //相对于父布局的坐标
+        int X = view.getLeft();
+        int bottomY = view.getBottom();
+        int topY = view.getTop();
+
         float evx = ev.getX();
         float evy = ev.getY();
-        if (evx < x || evx > (x + view.getWidth()) || evy < y || evy > (y + view.getHeight()) ){
-            return false;
+        System.out.println("x == "+X+"          bottom == "+bottomY+"            top == "+topY);
+        System.out.println("evx == "+evx+"          evy == "+evy);
+        if (evx > X && evx <= view.getWidth() && evy < bottomY && evy >= topY){
+            System.out.println("yes   withoutMenu");
+            return true;
         }
-        return  true;
+
+        return  false;
 
     }
 
