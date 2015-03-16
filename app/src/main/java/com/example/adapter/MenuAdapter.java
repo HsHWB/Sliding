@@ -28,7 +28,7 @@ public class MenuAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 15;
+        return 6;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class MenuAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         LinearLayout ll = new LinearLayout(context);//item的大布局
-        AbsListView.LayoutParams params = new AbsListView.LayoutParams(3*screenWidth/5, screenHeight/8);
+        AbsListView.LayoutParams params = new AbsListView.LayoutParams(3*screenWidth/5, screenHeight/10);
         ll.setLayoutParams(params);
 
         LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(3*screenWidth/5,

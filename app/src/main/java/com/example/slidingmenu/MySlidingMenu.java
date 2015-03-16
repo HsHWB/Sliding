@@ -10,6 +10,7 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.widget.AbsListView;
@@ -75,6 +76,7 @@ public class MySlidingMenu extends HorizontalScrollView {
             halfMenuWidth = menuWidth/2;
             menu.getLayoutParams().width = menuWidth;
             content.getLayoutParams().width = screenWidth;
+
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
@@ -91,19 +93,25 @@ public class MySlidingMenu extends HorizontalScrollView {
         }
     }
 
+    /**
+     *
+     * @param ev
+     * @return
+     */
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev){
 
 
-        if (isFocusOnListView(contentListView, ev) && shouldIntercept){
-
-            System.out.println("点击listview");
-            if(state) {
-                System.out.println("点击listview state");
-                isListView = true;
-            }
-            return true;
-        }
+//        if (isFocusOnListView(contentListView, ev) && shouldIntercept){
+//
+//            System.out.println("点击listview");
+//            if(state) {
+//                System.out.println("点击listview state");
+//                isListView = true;
+//            }
+//            return true;
+//        }
 
         return super.onInterceptTouchEvent(ev);
     }
@@ -112,7 +120,6 @@ public class MySlidingMenu extends HorizontalScrollView {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         int action = ev.getAction();
-//        System.out.println("onToughEvent");
         switch (action){
             case MotionEvent.ACTION_UP://UP时，用户（轻触触摸屏后）松开，或者按下屏幕快速移动后松开，判断，如果显示区域大于菜单宽度的一半，则隐藏
 
@@ -121,43 +128,40 @@ public class MySlidingMenu extends HorizontalScrollView {
                  */
                 int scrollX = getScrollX();//在content全屏的情况下，X无论点哪里都是最大值，当侧滑结束的情况下，无论点哪里都是0，在滑动过程中X动态变化
 
-                if (isListView){
-//                    System.out.println("滑动 == "+isListView);
-                    state = false;//准备关掉侧滑栏,状态设为false
-                    isListView = false;
-                    shouldIntercept = false;
-                    super.smoothScrollTo(menuWidth, 0);
-                    return true;
-                }
+//                if (isListView){
+//                    state = false;//准备关掉侧滑栏,状态设为false
+//                    isListView = false;
+//                    shouldIntercept = false;
+//                    super.smoothSc rollTo(menuWidth, 0);
+//                    return true;
+//                }
 
-                if(scrollX > halfMenuWidth*1.5 && state){//侧滑的宽度达到一定程度(scrollX越大代表拉的宽度越小，反弹)，
-                                                         // 而且state表示侧滑栏无显示
+                if(scrollX > halfMenuWidth*1.5 && !state){//侧滑右拉的宽度达到一定程度(scrollX越大代表拉的宽度越小，反弹)，
+                                                         // 而且 state = false 表示侧滑栏无显示
                     shouldIntercept = false;
                     state = false;
+                    isListView = false;
                     super.smoothScrollTo(menuWidth, 0);
                     return true;
-                }else if (scrollX <= halfMenuWidth && !state){//侧滑宽度小于一定程度，而且!state表示侧滑栏有显示，则继续显示侧滑
+                }else if (scrollX <= halfMenuWidth*1.5 && !state){//右拉一定程度，显示侧边栏，state改为true
+                    shouldIntercept = true;
+                    state = true;
+                    isListView = false;
+                    super.smoothScrollTo(0, 0);
+                    return true;
+                }else if (scrollX <= halfMenuWidth/2 && state){//侧滑左移宽度小于一定程度，而且state表示侧滑栏有显示，则继续显示侧滑
                     shouldIntercept = true;
                     state = true;
                     super.smoothScrollTo(0, 0);
                     return true;
-                }else if (scrollX > halfMenuWidth && !state){//侧滑宽度大于一定程度，而且侧滑栏有显示，则关闭侧滑栏
+                }else if (scrollX > halfMenuWidth/2 && state){//侧滑左移宽度大于一定程度，而且侧滑栏有显示，则关闭侧滑栏
                     shouldIntercept = false;
                     state = false;
+                    isListView = false;
                     super.smoothScrollTo(menuWidth, 0);
                     return true;
                 }
-                /**
-                 * 包含了scrollX <= halfMenuWidth && state的情况
-                 */
-                shouldIntercept = false;
-                isListView = false;
-                super.smoothScrollTo(menuWidth, 0);
-//                else {
-//                    shouldIntercept = true;
-//                    state = true;
-//                    super.smoothScrollTo(0, 0);
-//                }
+//                super.smoothScrollTo(menuWidth, 0);
                 return true;
 
         }
@@ -173,6 +177,14 @@ public class MySlidingMenu extends HorizontalScrollView {
 //        super.smoothScrollTo(menuWidth, 0);
 //    }
 
+
+    /**
+     * 完成坐标变化，还可以用setPolyToPoly
+     * @param l
+     * @param t
+     * @param oldl
+     * @param oldt
+     */
     @Override
     protected void onScrollChanged(int l, int t, int oldl, int oldt){
 
@@ -195,11 +207,20 @@ public class MySlidingMenu extends HorizontalScrollView {
 
     /**
      * http://blog.csdn.net/centralperk/article/details/7949900
+     *
+     * 获取view尺寸还可以用这个：
+     * View view1 = new View(context);
+         view1.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+         @Override
+            public void onGlobalLayout() {
+            //获取view尺寸
+            }
+            });
+     *
      * @param view
      * @param ev
      * @return
      */
-
     private boolean isFocusOnListView(View view, MotionEvent ev){
 
         //相对于父布局的坐标
@@ -209,13 +230,12 @@ public class MySlidingMenu extends HorizontalScrollView {
 
         float evx = ev.getX();
         float evy = ev.getY();
-        System.out.println("x == "+X+"          bottom == "+bottomY+"            top == "+topY);
-        System.out.println("evx == "+evx+"          evy == "+evy);
+//        System.out.println("x == "+X+"          bottom == "+bottomY+"            top == "+topY);
+//        System.out.println("evx == "+evx+"          evy == "+evy);
         if (evx > X && evx <= view.getWidth() && evy < bottomY && evy >= topY){
             System.out.println("yes   withoutMenu");
             return true;
         }
-
         return  false;
 
     }

@@ -75,7 +75,7 @@ public class SDCardFile {
     /**
      * 判断文件是否存在
      */
-    private boolean isExit(){
+    public boolean isExit(){
         if (file.isFile()){//若存在此文件
             return true;
         }

@@ -2,6 +2,7 @@ package com.example.until;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -13,6 +14,8 @@ import android.os.Environment;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
+
+import com.example.slidingmenu.R;
 
 /**
  * Created by Administrator on 2015/3/14.
@@ -36,9 +39,14 @@ public class CirclePicture extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (context != null) {
+            Bitmap bitmapPicture = null;
             SDCardFile sdCardImage = new SDCardFile(Environment.getExternalStorageDirectory()
-                    + "/Download/" + "picture1.jpg");
-            Bitmap bitmapPicture = sdCardImage.getSDImage();
+                    + "/Download/" + "head.jpg");
+            if(sdCardImage.getSDImage() != null) {
+                bitmapPicture = sdCardImage.getSDImage();
+            }else{
+                bitmapPicture = BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_launcher);
+            }
 
 //            System.out.println("bitmapPicture == "+bitmapPicture);
 
